@@ -1,10 +1,11 @@
+filetype plugin indent on
 syntax enable
 set nocompatible
 set relativenumber
 set mouse=a
-set ai
+set autoindent
 "set bg=light	this is for low-light environments
-set bg=dark	" this is for daytime
+set background=dark	" this is for daytime
 set incsearch
 set showmatch
 set clipboard=unnamedplus
@@ -35,16 +36,17 @@ nnoremap <silent>:srcfg :so ~/.vimrc<CR>
 nnoremap <C-t> :tabnew<CR>
 " Ctrl + s = save
 nnoremap <silent><C-s> :w<CR>
-inoremap <silent><C-s> <C-o>:w<CR>
+inoremap <C-s> <Cmd>:w<CR>
 
 nnoremap <silent> <F1> "_dd
 inoremap <F1> <C-o>"_dd
 
 nnoremap <Leader>cd :execute("chdir ".escape(expand("%:p:h"), ' '))<CR>
 "END SEC
+
 "START SEC: auto commands
 aug srcfg
-	au!
+	autocmd!
 	au BufWritePost ~/.vimrc so ~/.vimrc
 	au BufWritePre * %s/\s\+$//e
 	au InsertEnter * :set number relativenumber
