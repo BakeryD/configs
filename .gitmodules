@@ -10,3 +10,7 @@
 	path = vim/vim-surround
 	url = git@github.com:tpope/vim-surround.git
 	branch = master
+[submodule "vim/bufexplorer"]
+	path = vim/bufexplorer
+	url = git@github.com:jlanzarotta/bufexplorer.git
+	branch = master
