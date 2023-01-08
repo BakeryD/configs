@@ -14,3 +14,7 @@
 	path = vim/bufexplorer
 	url = git@github.com:jlanzarotta/bufexplorer.git
 	branch = master
+[submodule "vim/ale"]
+	path = vim/ale
+	url = git@github.com:dense-analysis/ale.git
+	branch = master
