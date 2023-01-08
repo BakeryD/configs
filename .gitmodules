@@ -1,9 +1,12 @@
 [submodule "vim/pathogen"]
 	path = vim/pathogen
 	url = https://github.com/tpope/vim-pathogen.git
+	branch = master
 [submodule "vim/omnisharp-vim"]
 	path = vim/omnisharp-vim
 	url = https://github.com/OmniSharp/omnisharp-vim.git
+	branch = master
 [submodule "vim/vim-surround"]
 	path = vim/vim-surround
 	url = git@github.com:tpope/vim-surround.git
+	branch = master
