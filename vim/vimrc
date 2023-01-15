@@ -1,5 +1,7 @@
 filetype plugin indent on
 syntax enable
+colorscheme synthwave84
+" Section: Options
 set nocompatible
 set relativenumber
 set mouse=a
@@ -20,15 +22,95 @@ set softtabstop=4
 set shiftwidth=4
 set expandtab
 
+highlight RedundantSpaces ctermbg=red guibg=red
+match RedundantSpaces /\s\+$/
+
+if has("win32")
+    "set shell=C:\Windows\system32\wsl.exe
+    set shell=\"C:\Git\sdk\bin\bash.exe\ \"
+    set shellpipe=|
+    set shellredir=>
+    "set shellcmdflag=
+    set shellquote="
+"    set shellslash   This breaks ALE :(
+    set nofixendofline " this causes a lot of unintentional file changes
+endif
 "set path+=** this will get you in trouble, use with caution
 set wildmenu
+set wildmode=longest,full
 let g:netrw_browse_split=4
 let g:netrw_altv=1
 let g:netrw_liststyle=3
+let g:bufExplorerFindActive=0
+let g:bufExplorerShowRelativePath=1
 
-"START SEC:	KEYMAPS
+"Section:   Commands
+command GitAdd :term ++hidden ++close git add %
+command GitBlame :term ++close git blame %
+command GUnstage :term git restore --staged %
+if has("win32")
+" windows needs \ path separators, but my term is using /
+    command Eslintf :exe "!eslint " .join(split(@%, "\\"), "/")
+    command JestFile :exe "!npm test -- " .join(split(@%, "\\"), "/")
+    command! Fontmenu :set guifont=*
+endif
+
+function! ToggleWhiteSpaceFixer()
+    if !exists('#dws#BufWritePre')
+        aug dws
+            autocmd!
+            autocmd BufWritePre * %s/\s\+$//e
+        aug END
+    else
+        aug dws
+            autocmd!
+        aug END
+    endif
+    match RedundantSpaces /\s\+$/
+endfunction
+
+command WSStatus :echo exists('#dws#BufWritePre')
+
+nnoremap <F3> :call ToggleWhiteSpaceFixer()<CR>
+
+"Section:   ALE
+set omnifunc=ale#completion#OmniFunc
+let g:ale_linters_explicit = 1  " Do as I say and ONLY as I say
+let g:ale_linter_aliases = {'vue': ['vue', 'javascript']}
+let g:ale_linters = {
+    \ 'typescript': ['volar'],
+    \ 'vue': ['eslint', 'volar', 'stylelint'],
+    \ 'less': ['stlyelint']
+\}
+let g:ale_fixers = {
+    \ '*': ['remove_trailing_lines', 'trim_whitespace'],
+    \ 'javascript': ['eslint'],
+    \ 'typescript': ['eslint'],
+    \ 'vue': ['eslint', 'stylelint'],
+\}
+let g:ale_vue_volar_executable='vue-language-server'
+let g:ale_completion_enabled=1
+let g:ale_rename_tsserver_find_in_strings = 1
+let g:ale_default_navigation='vsplit'
+let g:ale_floating_preview=1
+
+augroup ale_commands
+  autocmd!
+  autocmd FileType vue,typescript,javascript nnoremap <Leader>agd :ALEGoToDefinition -relative
+  autocmd FileType vue,typescript,javascript nnoremap <F12> :ALEGoToDefinition -relative
+  autocmd FileType vue,typescript,javascript nnoremap <silent> <Leader>afu :ALEFindReferences<CR>
+  autocmd FileType vue,typescript,javascript nnoremap <silent> <Leader>afx :ALEFix<CR>
+  autocmd FileType vue,typescript,javascript nnoremap <F2> :ALEImport<CR>
+  autocmd FileType vue,typescript,javascript nnoremap <C-r> :ALERename<CR>
+  autocmd FileType vue,typescript,javascript nmap <C-,> :ALEHover<CR>
+aug END
+
+"Section:	KEYMAPS
 let mapleader = ","
+"Stop being annoying when I switch buffers w/ the mouse
+inoremap <LeftMouse> <Esc><LeftMouse>
 nnoremap C :co
+vnoremap C :co
 nnoremap M :move
 nnoremap <C-w>t <C-w>gt
 nnoremap S :%s//g<Left><Left>
@@ -38,24 +120,38 @@ nnoremap <C-t> :tabnew<CR>
 nnoremap <silent><C-s> :w<CR>
 inoremap <C-s> <Cmd>:w<CR>
 
+" Ctrl + z = undo, Ctrl + y = redo
+inoremap <C-z> <C-o>u
+nnoremap <C-z> u
+inoremap <C-y> <C-o>:redo<CR>
+nnoremap <C-y> :redo<CR>
+
+" Alt + Up/Down = move 1 line
+nnoremap <silent><M-Up> :move.-2<CR>
+nnoremap <silent><M-Down> :move.+1<CR>
+vnoremap <silent><M-Up> :move.-2<CR>'<V'>
+vnoremap <M-Down> :<Left><Left><Left><Del>;<Right><Right>move.+1<CR>'<V'>
+inoremap <silent><M-Up> <C-o>:move.-2<CR>
+inoremap <silent><M-Down> <C-o>:move.+1<CR>
+
 nnoremap <silent> <F1> "_dd
 inoremap <F1> <C-o>"_dd
+nnoremap <F6> <Cmd>echo 'Current buffer: '. buffer_number()<CR>
 
+nnoremap <Leader>nn :setlocal nonumber norelativenumber<CR>
 nnoremap <Leader>cd :execute("chdir ".escape(expand("%:p:h"), ' '))<CR>
 "END SEC
 
-"START SEC: auto commands
+"Section: auto commands
 aug srcfg
 	autocmd!
 	au BufWritePost ~/.vimrc so ~/.vimrc
-	au BufWritePre * %s/\s\+$//e
+"	au BufWritePre * %s/\s\+$//e
 	au InsertEnter * :set number relativenumber
 	au InsertLeave * :set norelativenumber number
 "	au BufEnter * exe execute("chdir ".escape(expand("%:p:h"), ' '), "silent!")
 aug END
-"END SEC
 
-" START SEC: PATHOGEN
+" Section: PATHOGEN
 execute pathogen#infect()
 Helptags
-"END SEC

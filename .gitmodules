@@ -18,3 +18,7 @@
 	path = vim/ale
 	url = git@github.com:dense-analysis/ale.git
 	branch = master
+[submodule "vim/vim-impaired"]
+	path = vim/vim-impaired
+	url = https://github.com/tpope/vim-unimpaired.git
+	branch = master
