@@ -22,3 +22,7 @@
 	path = vim/vim-impaired
 	url = https://github.com/tpope/vim-unimpaired.git
 	branch = master
+[submodule "vim/vim-abolish"]
+	path = vim/vim-abolish
+	url = https://github.com/tpope/vim-abolish.git
+	branch = master
