@@ -1,16 +1,17 @@
 filetype plugin indent on
 syntax enable
-colorscheme synthwave84
+"colorscheme synthwave84
+colorscheme elflord
 " Section: Options
+set hidden
 set nocompatible
-set relativenumber
 set mouse=a
 set autoindent
 "set bg=light	this is for low-light environments
 set background=dark	" this is for daytime
 set incsearch
 set showmatch
-set clipboard=unnamedplus
+"set clipboard=unnamedplus
 set mouse=a
 set backspace=indent,eol,start
 set showmode
@@ -21,6 +22,11 @@ set tabstop=4
 set softtabstop=4
 set shiftwidth=4
 set expandtab
+set number
+if has('unix') && has("gui_running")
+    set toolbar=tooltips
+    set guifont=Monospace\ 8
+endif
 
 highlight RedundantSpaces ctermbg=red guibg=red
 match RedundantSpaces /\s\+$/
@@ -74,10 +80,11 @@ command WSStatus :echo exists('#dws#BufWritePre')
 nnoremap <F3> :call ToggleWhiteSpaceFixer()<CR>
 
 "Section:   ALE
-set omnifunc=ale#completion#OmniFunc
+"set omnifunc=ale#completion#OmniFunc
 let g:ale_linters_explicit = 1  " Do as I say and ONLY as I say
 let g:ale_linter_aliases = {'vue': ['vue', 'javascript']}
 let g:ale_linters = {
+    \ 'cs' : [ 'OmniSharp' ],
     \ 'typescript': ['volar'],
     \ 'vue': ['eslint', 'volar', 'stylelint'],
     \ 'less': ['stlyelint']
@@ -105,6 +112,63 @@ augroup ale_commands
   autocmd FileType vue,typescript,javascript nmap <C-,> :ALEHover<CR>
 aug END
 
+"Section:	OmniSharp
+    let g:OmniSharp_server_use_net6 = 1
+set completeopt=longest,menuone,popuphidden
+  " Highlight the completion documentation popup background/foreground the same as
+  " the completion menu itself, for better readability with highlighted
+  " documentation.
+set completepopup=highlight:Pmenu,border:off
+augroup omnisharp_commands
+  autocmd!
+
+  " Show type information automatically when the cursor stops moving.
+  " Note that the type is echoed to the Vim command line, and will overwrite
+  " any other messages in this space including e.g. ALE linting messages.
+  autocmd CursorHold *.cs OmniSharpTypeLookup
+
+  " The following commands are contextual, based on the cursor position.
+  autocmd FileType cs nmap <silent> <buffer> gd :OmniSharpGotoDefinition
+  autocmd FileType cs nmap <silent> <buffer> <Leader>osfu <Plug>(omnisharp_find_usages)
+  autocmd FileType cs nmap <silent> <buffer> <C-F12> <Plug>(omnisharp_find_usages)
+  autocmd FileType cs nmap <silent> <buffer> <Leader>osfi <Plug>(omnisharp_find_implementations)
+  autocmd FileType cs nmap <silent> <buffer> <Leader>ospd <Plug>(omnisharp_preview_definition)
+  autocmd FileType cs nmap <buffer> <F12> :OmniSharpPreviewDefinition<CR>
+  autocmd FileType cs inoremap <buffer> <F12> <C-o><F12>
+  autocmd FileType cs nmap <silent> <buffer> <F12> <Plug>(omnisharp_preview_definition)
+  autocmd FileType cs nmap <silent> <buffer> <Leader>ospi <Plug>(omnisharp_preview_implementations)
+  autocmd FileType cs nmap <silent> <buffer> <Leader>ost <Plug>(omnisharp_type_lookup)
+  autocmd FileType cs nmap <silent> <buffer> <Leader>osd <Plug>(omnisharp_documentation)
+  autocmd FileType cs nnoremap <silent> <buffer> <F11> <Plug>(omnisharp_documentation)
+  autocmd FileType cs imap <silent> <buffer> <F11> <Plug>(omnisharp_documentation)
+  autocmd FileType cs nmap <silent> <buffer> <Leader>osfs <Plug>(omnisharp_find_symbol)
+  autocmd FileType cs nmap <silent> <buffer> <Leader>osfx <Plug>(omnisharp_fix_usings)
+  autocmd FileType cs nmap <silent> <buffer> <C-,> <Plug>(omnisharp_signature_help)
+  autocmd FileType cs imap <silent> <buffer> <C-,> <Plug>(omnisharp_signature_help)
+  autocmd FileType cs imap <silent> <buffer> <C-/> <C-o>:OmniSharpSignatureHelp<CR>
+
+  " Navigate up and down by method/property/field
+  autocmd FileType cs nmap <silent> <buffer> [[ <Plug>(omnisharp_navigate_up)
+  autocmd FileType cs nmap <silent> <buffer> ]] <Plug>(omnisharp_navigate_down)
+  " Find all code errors/warnings for the current solution and populate the quickfix window
+  autocmd FileType cs nmap <silent> <buffer> <Leader>osgcc <Plug>(omnisharp_global_code_check)
+  autocmd FileType cs nmap <silent> <buffer> <C-.> <Plug>(omnisharp_code_actions)
+  autocmd FileType cs nmap <silent> <buffer> <C-\> <Plug>(omnisharp_code_actions)
+  autocmd FileType cs nmap <silent> <buffer> <Leader>osca <Plug>(omnisharp_code_actions)
+  autocmd FileType cs xmap <silent> <buffer> <Leader>osca <Plug>(omnisharp_code_actions)
+  autocmd FileType cs nmap <silent> <buffer> <Leader>os. <Plug>(omnisharp_code_action_repeat)
+  autocmd FileType cs xmap <silent> <buffer> <Leader>os. <Plug>(omnisharp_code_action_repeat)
+
+  autocmd FileType cs nmap <silent> <buffer> <Leader>os= <Plug>(omnisharp_code_format)
+
+  autocmd FileType cs nmap <silent> <buffer> <Leader>osnm <Plug>(omnisharp_rename)
+
+  autocmd FileType cs nmap <silent> <buffer> <Leader>osre <Plug>(omnisharp_restart_server)
+  autocmd FileType cs nmap <silent> <buffer> <Leader>osst <Plug>(omnisharp_start_server)
+  autocmd FileType cs nmap <silent> <buffer> <Leader>ossp <Plug>(omnisharp_stop_server)
+  autocmd FileType cs nmap <silent> <buffer> <C-R> :OmniSharpRename<CR>
+augroup END
+
 "Section:	KEYMAPS
 let mapleader = ","
 "Stop being annoying when I switch buffers w/ the mouse
@@ -127,10 +191,11 @@ inoremap <C-y> <C-o>:redo<CR>
 nnoremap <C-y> :redo<CR>
 
 " Alt + Up/Down = move 1 line
+inoremap <F3> <C-r>=expand('%:t:r')<CR>
 nnoremap <silent><M-Up> :move.-2<CR>
 nnoremap <silent><M-Down> :move.+1<CR>
-vnoremap <silent><M-Up> :move.-2<CR>'<V'>
-vnoremap <M-Down> :<Left><Left><Left><Del>;<Right><Right>move.+1<CR>'<V'>
+vnoremap <silent><M-Up> :move.-2<CR>gv
+vnoremap <M-Down> :<C-U>'<;'>move'>+1<CR>gv
 inoremap <silent><M-Up> <C-o>:move.-2<CR>
 inoremap <silent><M-Down> <C-o>:move.+1<CR>
 
@@ -146,11 +211,16 @@ nnoremap <Leader>cd :execute("chdir ".escape(expand("%:p:h"), ' '))<CR>
 aug srcfg
 	autocmd!
 	au BufWritePost ~/.vimrc so ~/.vimrc
+	au BufWritePost ~/.vim/vimrc so ~/.vim/vimrc
 "	au BufWritePre * %s/\s\+$//e
 	au InsertEnter * :set number relativenumber
 	au InsertLeave * :set norelativenumber number
 "	au BufEnter * exe execute("chdir ".escape(expand("%:p:h"), ' '), "silent!")
 aug END
+
+"Section coc.nvim
+
+inoremap <expr> <cr> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
 
 " Section: PATHOGEN
 execute pathogen#infect()
